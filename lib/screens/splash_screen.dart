@@ -1,6 +1,6 @@
 // lib/screens/welcome_screen.dart
+import 'onboarding_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../core/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -78,6 +78,22 @@ class _SplashScreenState extends State<SplashScreen>
           _controller.forward();
         }
       });
+    });
+
+    // Pindah otomatis ke OnboardingScreen setelah animasi selesai (2.5 detik)
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 600),
+            pageBuilder: (context, animation, secondaryAnimation) => const OnboardingScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      }
     });
   }
 
