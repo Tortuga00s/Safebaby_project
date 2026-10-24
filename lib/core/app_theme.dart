@@ -11,26 +11,26 @@ class AppColors {
 }
 
 class AppTextStyles {
-  static TextStyle get title => GoogleFonts.plusJakartaSans(
+  static TextStyle get title => GoogleFonts.inter(
     fontSize: 32,
     fontWeight: FontWeight.bold,
     color: AppColors.textWhite,
   );
 
-  static TextStyle get subtitle => GoogleFonts.plusJakartaSans(
+  static TextStyle get subtitle => GoogleFonts.inter(
     fontSize: 16,
     height: 1.6,
     fontWeight: FontWeight.w400,
     color: AppColors.textMuted,
   );
 
-  static TextStyle get button => GoogleFonts.plusJakartaSans(
+  static TextStyle get button => GoogleFonts.inter(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppColors.textWhite,
   );
 
-  static TextStyle get footer => GoogleFonts.plusJakartaSans(
+  static TextStyle get footer => GoogleFonts.inter(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.textFooter,

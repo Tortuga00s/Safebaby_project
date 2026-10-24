@@ -1,4 +1,5 @@
 // lib/screens/onboarding_screen.dart
+import 'create_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -58,8 +59,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeOutCubic,
       );
     } else {
-      // Aksi ketika onboarding selesai (misal masuk ke Auth / Home)
-      debugPrint('Onboarding Selesai!');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const CreateProfileScreen()),
+      );
     }
   }
 
@@ -106,8 +109,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(width: 8),
                     Text(
                       'SafeBaby',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18,
+                      style: GoogleFonts.inter(
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryDark,
                       ),
@@ -124,7 +127,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           onPressed: _skipToLast,
                           child: Text(
                             'Lewati',
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.accentTeal,
@@ -177,7 +180,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           // Teks Step: "01 / 03"
                           Text(
                             item.step,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppColors.accentTeal,
@@ -192,7 +195,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             height: 68,
                             child: Text(
                               item.title,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 26,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primaryDark,
@@ -208,7 +211,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             height: 48,
                             child: Text(
                               item.description,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
                                 color: const Color(0xFF64748B),
@@ -414,7 +417,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(width: 4),
                       Text(
                         'Tersimpan aman',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: AppColors.accentTeal,

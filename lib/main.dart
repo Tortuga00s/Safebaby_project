@@ -1,6 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
@@ -15,7 +15,11 @@ class SafeBabyApp extends StatelessWidget {
     return MaterialApp(
       title: 'SafeBaby',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: GoogleFonts.inter().fontFamily,
+      ),
       home: const SplashScreen(),
     );
   }
