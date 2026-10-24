@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_theme.dart';
+import 'notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String userName;
@@ -31,27 +32,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const SizedBox(height: 8),
 
-              // ─── 1. TOP BAR: GREETING & NOTIFIKASI ───
+              // â”€â”€â”€ 1. TOP BAR: GREETING & NOTIFIKASI â”€â”€â”€
               _buildHeader(),
 
               const SizedBox(height: 24),
 
-              // ─── 2. HERO CARD: KONTROL BERIKUTNYA ───
+              // â”€â”€â”€ 2. HERO CARD: KONTROL BERIKUTNYA â”€â”€â”€
               _buildNextCheckupHeroCard(),
 
               const SizedBox(height: 16),
 
-              // ─── 3. STATUS CARD: PENGINGAT AKTIF ───
+              // â”€â”€â”€ 3. STATUS CARD: PENGINGAT AKTIF â”€â”€â”€
               _buildActiveReminderCard(),
 
               const SizedBox(height: 24),
 
-              // ─── 4. SECTION: RIWAYAT TERBARU ───
+              // â”€â”€â”€ 4. SECTION: RIWAYAT TERBARU â”€â”€â”€
               _buildRecentHistorySection(),
 
               const SizedBox(height: 20),
 
-              // ─── 5. FEATURE CARD: TIP HARI INI ───
+              // â”€â”€â”€ 5. FEATURE CARD: TIP HARI INI â”€â”€â”€
               _buildDailyTipCard(),
 
               const SizedBox(height: 20),
@@ -63,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ─── 1. WIDGET HEADER (SALAM & TOMBOL NOTIFIKASI) ───
+  // â”€â”€â”€ 1. WIDGET HEADER (SALAM & TOMBOL NOTIFIKASI) â”€â”€â”€
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -93,41 +94,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         // Tombol Lonceng Notifikasi dengan Badge Titik Merah
-        Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEAF8F6),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Icon(
-                Icons.notifications_none_rounded,
-                color: AppColors.primaryDark,
-                size: 24,
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationScreen(),
               ),
-              Positioned(
-                top: 11,
-                right: 12,
-                child: Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
-                    shape: BoxShape.circle,
+            );
+          },
+          child: Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEAF8F6),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Icon(
+                  Icons.notifications_none_rounded,
+                  color: AppColors.primaryDark,
+                  size: 24,
+                ),
+                Positioned(
+                  top: 11,
+                  right: 12,
+                  child: Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  // ─── 2. WIDGET HERO CARD: KONTROL BERIKUTNYA ───
+  // â”€â”€â”€ 2. WIDGET HERO CARD: KONTROL BERIKUTNYA â”€â”€â”€
   Widget _buildNextCheckupHeroCard() {
     return Container(
       width: double.infinity,
@@ -283,80 +294,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ─── 3. WIDGET STATUS CARD: PENGINGAT AKTIF ───
   Widget _buildActiveReminderCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1.0,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A0F172A),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const NotificationScreen(),
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Icon Kotak Lonceng Mint
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF8F6),
-              borderRadius: BorderRadius.circular(14),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A0F172A),
+              blurRadius: 10,
+              offset: Offset(0, 4),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: AppColors.accentTeal,
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon Kotak Lonceng Mint
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF8F6),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: AppColors.accentTeal,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Teks Pengingat
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pengingat aktif',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Kami akan mengingatkan Anda pada 17 Oktober.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Chevron Arrow Kanan
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Color(0xFF94A3B8),
               size: 22,
             ),
-          ),
-          const SizedBox(width: 14),
-
-          // Teks Pengingat
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Pengingat aktif',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Kami akan mengingatkan Anda pada 17 Oktober.',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Chevron Arrow Kanan
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: Color(0xFF94A3B8),
-            size: 22,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // ─── 4. WIDGET SECTION: RIWAYAT TERBARU ───
+  // â”€â”€â”€ 4. WIDGET SECTION: RIWAYAT TERBARU â”€â”€â”€
   Widget _buildRecentHistorySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +525,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ─── 5. WIDGET FEATURE CARD: TIP HARI INI ───
+  // â”€â”€â”€ 5. WIDGET FEATURE CARD: TIP HARI INI â”€â”€â”€
   Widget _buildDailyTipCard() {
     return Container(
       width: double.infinity,
@@ -598,7 +619,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ─── 6. BOTTOM NAVIGATION BAR ───
+  // â”€â”€â”€ 6. BOTTOM NAVIGATION BAR â”€â”€â”€
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: const BoxDecoration(
