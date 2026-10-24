@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../core/app_theme.dart';
+import 'dashboard_screen.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   const CreateProfileScreen({super.key});
@@ -51,6 +52,82 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
     }
     return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  // Fungsi validasi data profil sebelum masuk ke Dashboard
+  void _saveProfile() {
+    final name = _nameController.text.trim();
+    final age = _ageController.text.trim();
+    final phone = _phoneController.text.trim();
+    final pregnancy = _pregnancyController.text.trim();
+
+    // Validasi form: semua kolom wajib diisi
+    if (name.isEmpty) {
+      _showWarningSnackBar('Mohon isi nama lengkap Anda.');
+      return;
+    }
+    if (age.isEmpty) {
+      _showWarningSnackBar('Mohon isi usia Anda.');
+      return;
+    }
+    if (phone.isEmpty) {
+      _showWarningSnackBar('Mohon isi nomor telepon Anda.');
+      return;
+    }
+    if (pregnancy.isEmpty) {
+      _showWarningSnackBar('Mohon isi informasi kehamilan Anda.');
+      return;
+    }
+
+    // Ekstrak nama depan secara dinamis & rapi untuk greeting di Dashboard
+    final firstName = name.split(RegExp(r'\s+')).first;
+    final formattedName = firstName.isNotEmpty
+        ? firstName[0].toUpperCase() + firstName.substring(1).toLowerCase()
+        : 'Siti';
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DashboardScreen(
+          userName: formattedName,
+        ),
+      ),
+    );
+  }
+
+  void _showWarningSnackBar(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(
+              Icons.info_outline_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFFEF4444),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   // Fungsi bottom sheet untuk memilih foto dari Galeri atau Kamera
@@ -317,11 +394,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    debugPrint(
-                      'Simpan Profil: Nama=${_nameController.text}, Usia=${_ageController.text}, Telp=${_phoneController.text}, Info=${_pregnancyController.text}',
-                    );
-                  },
+                  onPressed: _saveProfile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryDark,
                     foregroundColor: Colors.white,
