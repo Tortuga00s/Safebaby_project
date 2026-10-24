@@ -2,13 +2,14 @@
 
   <img src="assets/images/safebaby_logo_teal.png" alt="SafeBaby Logo" width="220" />
 
-  # SafeBaby 👶✨
-  **Aplikasi Mobile Pendamping Kehamilan yang Aman & Terpercaya**
+# SafeBaby 👶✨
+
+**Aplikasi Mobile Pendamping Kehamilan yang Aman & Terpercaya**
 
   [![Flutter](https://img.shields.io/badge/Flutter-3.47+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
   [![Dart](https://img.shields.io/badge/Dart-3.13+-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
   [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey?style=for-the-badge)](https://flutter.dev)
-  [![Status](https://img.shields.io/badge/Status-In%20Development-success?style=for-the-badge)]()
+  ![Status](https://img.shields.io/badge/Status-In%20Development-success?style=for-the-badge)
 
   <p align="center">
     SafeBaby dirancang untuk membantu para calon orang tua, khususnya para ibu, dalam memantau masa kehamilan dengan lebih teratur, tenang, dan terstruktur melalui manajemen jadwal kontrol serta pencatatan riwayat kesehatan kehamilan.
@@ -19,6 +20,7 @@
 ---
 
 ## 📌 Daftar Isi
+
 - [Tentang SafeBaby](#-tentang-safebaby)
 - [Fitur Utama](#-fitur-utama)
 - [Desain & Branding](#-desain--branding)
@@ -32,7 +34,7 @@
 
 ## 📖 Tentang SafeBaby
 
-**SafeBaby** adalah aplikasi mobile berbasis Flutter yang hadir sebagai asisten digital dalam perjalanan masa kehamilan. Masa kehamilan merupakan momen berharga yang membutuhkan perhatian khusus, baik dalam kepatuhan jadwal pemeriksaan medis rutin, konsultasi USG, hingga pemantauan perkembangan janin. 
+**SafeBaby** adalah aplikasi mobile berbasis Flutter yang hadir sebagai asisten digital dalam perjalanan masa kehamilan. Masa kehamilan merupakan momen berharga yang membutuhkan perhatian khusus, baik dalam kepatuhan jadwal pemeriksaan medis rutin, konsultasi USG, hingga pemantauan perkembangan janin.
 
 Aplikasi ini mengintegrasikan antarmuka modern yang tenang, responsif, dan mudah digunakan agar para ibu dapat mengelola seluruh kebutuhan pemeriksaan kehamilan dalam satu genggaman tanpa khawatir melewatkan jadwal penting.
 
@@ -64,7 +66,7 @@ SafeBaby mengusung tema visual yang menenangkan (*calm*), modern, dan ramah peng
 
 ---
 
-## 🛠️ Tech Stack & Dependensi
+## 🛠 Tech Stack & Dependensi
 
 - **Core Framework**: [Flutter](https://flutter.dev/) (SDK `^3.13.3` / Flutter `3.47+`)
 - **Bahasa Pemrograman**: [Dart](https://dart.dev/)
@@ -108,7 +110,9 @@ Safebaby_project/
 ## 💻 Panduan Instalasi & Menjalankan
 
 ### Prasyarat Sistem
+
 Pastikan perangkat Anda telah terpasang:
+
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi stable terbaru)
 - Android Studio / VS Code dengan ekstensi Flutter & Dart
 - Emulator Android / iOS Simulator atau perangkat fisik yang terhubung
@@ -116,27 +120,32 @@ Pastikan perangkat Anda telah terpasang:
 ### Langkah-langkah Menjalankan
 
 1. **Clone repositori ini:**
+
    ```bash
    git clone https://github.com/Tortuga00s/Safebaby_project.git
    cd Safebaby_project
    ```
 
 2. **Pasang seluruh dependensi proyek:**
+
    ```bash
    flutter pub get
    ```
 
 3. **Verifikasi perangkat target:**
+
    ```bash
    flutter devices
    ```
 
 4. **Jalankan aplikasi dalam mode debug:**
+
    ```bash
    flutter run
    ```
 
 5. **(Opsional) Build berkas APK untuk Android:**
+
    ```bash
    flutter build apk --release
    ```
@@ -146,16 +155,19 @@ Pastikan perangkat Anda telah terpasang:
 ## ⚡ Perintah Pengembangan
 
 - **Menjalankan Linter / Analisis Kode:**
+
   ```bash
   flutter analyze
   ```
 
 - **Menjalankan Pengujian (Testing):**
+
   ```bash
   flutter test
   ```
 
 - **Memperbarui / Generate Launcher Icon:**
+
   ```bash
   dart run flutter_launcher_icons
   ```
