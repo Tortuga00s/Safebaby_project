@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_theme.dart';
 import 'notification_screen.dart';
+import 'schedule_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String userName;
@@ -24,47 +25,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
+      body: IndexedStack(
+        index: _currentTabIndex,
+        children: [
+          // Tab 0: Konten Dashboard Utama
+          _buildDashboardContent(),
 
-              // â”€â”€â”€ 1. TOP BAR: GREETING & NOTIFIKASI â”€â”€â”€
-              _buildHeader(),
-
-              const SizedBox(height: 24),
-
-              // â”€â”€â”€ 2. HERO CARD: KONTROL BERIKUTNYA â”€â”€â”€
-              _buildNextCheckupHeroCard(),
-
-              const SizedBox(height: 16),
-
-              // â”€â”€â”€ 3. STATUS CARD: PENGINGAT AKTIF â”€â”€â”€
-              _buildActiveReminderCard(),
-
-              const SizedBox(height: 24),
-
-              // â”€â”€â”€ 4. SECTION: RIWAYAT TERBARU â”€â”€â”€
-              _buildRecentHistorySection(),
-
-              const SizedBox(height: 20),
-
-              // â”€â”€â”€ 5. FEATURE CARD: TIP HARI INI â”€â”€â”€
-              _buildDailyTipCard(),
-
-              const SizedBox(height: 20),
-            ],
+          // Tab 1: Halaman Jadwal Kontrol
+          ScheduleScreen(
+            isEmbedded: true,
+            onNavigateToDashboard: () {
+              setState(() {
+                _currentTabIndex = 0;
+              });
+            },
           ),
-        ),
+
+          // Tab 2: Riwayat Pemeriksaan (Placeholder)
+          _buildPlaceholderTab('Riwayat Pemeriksaan'),
+
+          // Tab 3: Profil Pengguna (Placeholder)
+          _buildPlaceholderTab('Profil Pengguna'),
+        ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  // â”€â”€â”€ 1. WIDGET HEADER (SALAM & TOMBOL NOTIFIKASI) â”€â”€â”€
+  // ─── KONTEN TAB 0: DASHBOARD ───
+  Widget _buildDashboardContent() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+
+            // 1. TOP BAR: GREETING & NOTIFIKASI
+            _buildHeader(),
+
+            const SizedBox(height: 24),
+
+            // 2. HERO CARD: KONTROL BERIKUTNYA
+            _buildNextCheckupHeroCard(),
+
+            const SizedBox(height: 16),
+
+            // 3. STATUS CARD: PENGINGAT AKTIF
+            _buildActiveReminderCard(),
+
+            const SizedBox(height: 24),
+
+            // 4. SECTION: RIWAYAT TERBARU
+            _buildRecentHistorySection(),
+
+            const SizedBox(height: 20),
+
+            // 5. FEATURE CARD: TIP HARI INI
+            _buildDailyTipCard(),
+
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── 1. WIDGET HEADER (SALAM & TOMBOL NOTIFIKASI) ───
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -93,6 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
+
         // Tombol Lonceng Notifikasi dengan Badge Titik Merah
         GestureDetector(
           onTap: () {
@@ -138,156 +167,164 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // â”€â”€â”€ 2. WIDGET HERO CARD: KONTROL BERIKUTNYA â”€â”€â”€
+  // ─── 2. WIDGET HERO CARD: KONTROL BERIKUTNYA ───
   Widget _buildNextCheckupHeroCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22.0),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryDark.withValues(alpha: 0.18),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Baris Atas: Label Kontrol & Pill "3 Hari Lagi"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'KONTROL BERIKUTNYA',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.0,
-                  color: Colors.white.withValues(alpha: 0.75),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 6.0,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.accentTeal,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '3 Hari Lagi',
+    return GestureDetector(
+      onTap: () {
+        // Klik hero card langsung membuka tab Jadwal
+        setState(() {
+          _currentTabIndex = 1;
+        });
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(22.0),
+        decoration: BoxDecoration(
+          color: AppColors.primaryDark,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryDark.withValues(alpha: 0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Baris Atas: Label Kontrol & Pill "3 Hari Lagi"
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'KONTROL BERIKUTNYA',
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
+                    color: Colors.white.withValues(alpha: 0.75),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Baris Tengah: Tanggal Besar "20" + "Oktober 2026"
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                '20',
-                style: GoogleFonts.inter(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 1.0,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Oktober',
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 6.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentTeal,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '3 Hari Lagi',
                     style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '2026',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white.withValues(alpha: 0.65),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Baris Tengah: Tanggal Besar "20" + "Oktober 2026"
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  '20',
+                  style: GoogleFonts.inter(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.0,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Oktober',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          // Garis Pembatas Tipis Transparan
-          Divider(
-            color: Colors.white.withValues(alpha: 0.12),
-            height: 1,
-            thickness: 1,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Baris Bawah: Waktu & Lokasi
-          Row(
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    size: 16,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '09.00 WIB',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.9),
+                    const SizedBox(height: 2),
+                    Text(
+                      '2026',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withValues(alpha: 0.65),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 20),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 16,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Klinik ABC',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.9),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 18),
+
+            // Garis Pembatas Tipis Transparan
+            Divider(
+              color: Colors.white.withValues(alpha: 0.12),
+              height: 1,
+              thickness: 1,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Baris Bawah: Waktu & Lokasi
+            Row(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: 16,
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+                    const SizedBox(width: 6),
+                    Text(
+                      '09.00 WIB',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 20),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Klinik ABC',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -377,7 +414,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // â”€â”€â”€ 4. WIDGET SECTION: RIWAYAT TERBARU â”€â”€â”€
+  // ─── 4. WIDGET SECTION: RIWAYAT TERBARU ───
   Widget _buildRecentHistorySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +448,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             GestureDetector(
               onTap: () {
-                debugPrint('Lihat semua riwayat diklik');
+                setState(() {
+                  _currentTabIndex = 2; // Pindah ke tab Riwayat
+                });
               },
               child: Text(
                 'Lihat semua',
@@ -525,7 +564,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // â”€â”€â”€ 5. WIDGET FEATURE CARD: TIP HARI INI â”€â”€â”€
+  // ─── 5. WIDGET FEATURE CARD: TIP HARI INI ───
   Widget _buildDailyTipCard() {
     return Container(
       width: double.infinity,
@@ -619,7 +658,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // â”€â”€â”€ 6. BOTTOM NAVIGATION BAR â”€â”€â”€
+  // ─── PLACEHOLDER UNTUK TAB RIWAYAT & PROFIL ───
+  Widget _buildPlaceholderTab(String title) {
+    return SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.hourglass_empty_rounded,
+              size: 48,
+              color: AppColors.accentTeal,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Halaman ini akan segera hadir pada update berikutnya.',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── 6. BOTTOM NAVIGATION BAR ───
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: const BoxDecoration(
@@ -709,4 +783,3 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
-
