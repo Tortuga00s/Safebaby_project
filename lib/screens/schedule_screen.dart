@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_theme.dart';
-import 'notification_screen.dart';
+import '../core/schedule_data.dart';
+import 'add_schedule_screen.dart';
 
 class ScheduleScreen extends StatefulWidget {
   final VoidCallback? onNavigateToDashboard;
   final bool isEmbedded;
+  final int? initialSelectedDate;
 
   const ScheduleScreen({
     super.key,
     this.onNavigateToDashboard,
     this.isEmbedded = false,
+    this.initialSelectedDate,
   });
 
   @override
@@ -20,62 +23,80 @@ class ScheduleScreen extends StatefulWidget {
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
-  // Tanggal yang sedang dipilih (default: null atau tanggal 20 jika dipilih)
-  int? _selectedDate = 20;
-
-  // Tanggal yang memiliki jadwal kontrol aktif (misal: 20 Oktober 2026)
-  final int _scheduledDate = 20;
+  // Tanggal yang sedang dipilih (null jika belum memilih tanggal)
+  int? _selectedDate;
 
   // Tab navigasi bawah jika screen dibuka secara standalone
   int _currentTabIndex = 1;
 
   @override
-  Widget build(BuildContext context) {
-    final content = SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialSelectedDate;
+  }
 
-            // ─── 1. TOP BAR: JUDUL & TOMBOL TAMBAH (+) ───
-            _buildHeader(),
-
-            const SizedBox(height: 28),
-
-            // ─── 2. BULAN & PANDUAN GANTI BULAN ───
-            _buildMonthHeader(),
-
-            const SizedBox(height: 20),
-
-            // ─── 3. KALENDER BULANAN INTERAKTIF (OKTOBER 2026) ───
-            _buildCalendarGrid(),
-
-            const SizedBox(height: 28),
-
-            // ─── 4. CARD PANDUAN / DETAIL TANGGAL DIPILIH ───
-            _buildSelectionGuideCard(),
-
-            const SizedBox(height: 16),
-
-            // ─── 5. CARD STATUS PENGINGAT H-3 AKTIF ───
-            _buildReminderStatusCard(),
-
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-
-    if (widget.isEmbedded) {
-      return content;
+  @override
+  void didUpdateWidget(covariant ScheduleScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSelectedDate != null &&
+        widget.initialSelectedDate != oldWidget.initialSelectedDate) {
+      _selectedDate = widget.initialSelectedDate;
     }
+  }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: content,
-      bottomNavigationBar: _buildBottomNavigationBar(),
+  @override
+  Widget build(BuildContext context) {
+    // Dengarkan perubahan data jadwal secara reaktif
+    return ValueListenableBuilder<List<ScheduleItem>>(
+      valueListenable: ScheduleData.instance.schedulesNotifier,
+      builder: (context, schedules, _) {
+        final content = SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+
+                // ─── 1. TOP BAR: JUDUL & TOMBOL TAMBAH (+) ───
+                _buildHeader(),
+
+                const SizedBox(height: 28),
+
+                // ─── 2. BULAN & PANDUAN GANTI BULAN ───
+                _buildMonthHeader(),
+
+                const SizedBox(height: 20),
+
+                // ─── 3. KALENDER BULANAN INTERAKTIF (OKTOBER 2026) ───
+                _buildCalendarGrid(),
+
+                const SizedBox(height: 28),
+
+                // ─── 4. CARD PANDUAN / DETAIL TANGGAL DIPILIH ───
+                _buildSelectionGuideCard(),
+
+                const SizedBox(height: 16),
+
+                // ─── 5. CARD STATUS PENGINGAT H-3 AKTIF ───
+                _buildReminderStatusCard(),
+
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+
+        if (widget.isEmbedded) {
+          return content;
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          body: content,
+          bottomNavigationBar: _buildBottomNavigationBar(),
+        );
+      },
     );
   }
 
@@ -111,9 +132,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
         // Tombol Tambah (+) Abu-Abu Bulat
         GestureDetector(
-          onTap: () {
-            _showAddScheduleBottomSheet();
-          },
+          onTap: _navigateToAddSchedule,
           child: Container(
             width: 46,
             height: 46,
@@ -210,7 +229,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       // Baris 4
       _CalendarCell(day: 18, isCurrentMonth: true, isWeekend: true),
       _CalendarCell(day: 19, isCurrentMonth: true),
-      _CalendarCell(day: 20, isCurrentMonth: true, hasEventDot: true),
+      _CalendarCell(day: 20, isCurrentMonth: true),
       _CalendarCell(day: 21, isCurrentMonth: true),
       _CalendarCell(day: 22, isCurrentMonth: true),
       _CalendarCell(day: 23, isCurrentMonth: true),
@@ -265,6 +284,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             final cell = calendarCells[index];
             final isSelected = cell.isCurrentMonth && _selectedDate == cell.day;
 
+            // Cek apakah tanggal ini memiliki jadwal tersimpan di ScheduleData
+            final hasSchedule = cell.isCurrentMonth &&
+                ScheduleData.instance.hasScheduleOnDay(2026, 10, cell.day);
+
             Color textColor;
             if (!cell.isCurrentMonth) {
               textColor = cell.isWeekend
@@ -308,7 +331,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         '${cell.day}',
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          fontWeight: isSelected || cell.hasEventDot
+                          fontWeight: isSelected || hasSchedule
                               ? FontWeight.bold
                               : FontWeight.w600,
                           color: textColor,
@@ -317,8 +340,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                     const SizedBox(height: 2),
 
-                    // Titik Indikator Toska (Untuk tanggal dengan jadwal kontrol, misal: 20)
-                    if (cell.hasEventDot)
+                    // Titik Indikator Toska Dinamis (Muncul untuk semua tanggal berjadwal)
+                    if (hasSchedule)
                       Container(
                         width: 5,
                         height: 5,
@@ -339,9 +362,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // ─── 4. WIDGET CARD PANDUAN / DETAIL TANGGAL ───
+  // ─── 4. WIDGET CARD PANDUAN / DETAIL TANGGAL DENGAN EDIT & DELETE ───
   Widget _buildSelectionGuideCard() {
-    final isControlDay = _selectedDate == _scheduledDate;
+    // Ambil jadwal tersimpan untuk tanggal yang sedang dipilih
+    final schedule = _selectedDate != null
+        ? ScheduleData.instance.getScheduleForDay(2026, 10, _selectedDate!)
+        : null;
+
+    final isScheduled = schedule != null;
 
     return Container(
       width: double.infinity,
@@ -381,92 +409,21 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
           // Teks Panduan / Jadwal
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isControlDay
-                      ? '20 Oktober 2026 • 09.00 WIB'
-                      : 'Pilih tanggal terlebih dahulu',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isControlDay
-                      ? 'Jadwal Kontrol Rutin di Klinik ABC'
-                      : 'Setelah tanggal dipilih, tekan tombol + di kanan atas.',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── 5. WIDGET STATUS CARD: PENGINGAT H-3 AKTIF ───
-  Widget _buildReminderStatusCard() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const NotificationScreen(),
-          ),
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: const Color(0xFFE2E8F0),
-            width: 1.0,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x080F172A),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Ikon Lonceng Mint
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF8F6),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(
-                Icons.notifications_none_outlined,
-                color: AppColors.accentTeal,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 14),
-
-            // Teks Pengingat
-            Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (isScheduled) {
+                  _navigateToEditSchedule(schedule);
+                } else {
+                  _navigateToAddSchedule();
+                }
+              },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Pengingat H-3 aktif',
+                    isScheduled
+                        ? '${schedule.date.day} Oktober 2026 • ${schedule.time}'
+                        : 'Pilih tanggal terlebih dahulu',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -475,7 +432,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    'Notifikasi akan dikirim otomatis',
+                    isScheduled
+                        ? '${schedule.location} (${schedule.status})'
+                        : 'Setelah tanggal dipilih, tekan tombol + di kanan atas.',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -485,15 +444,411 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 ],
               ),
             ),
+          ),
 
-            // Chevron Arrow Kanan
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Color(0xFF94A3B8),
-              size: 22,
+          if (isScheduled) ...[
+            const SizedBox(width: 8),
+
+            // Tombol Ubah (Pensil)
+            GestureDetector(
+              onTap: () => _navigateToEditSchedule(schedule),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF8F6),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.edit_outlined,
+                  color: AppColors.accentTeal,
+                  size: 18,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            // Tombol Hapus (Sampah Merah)
+            GestureDetector(
+              onTap: () => _confirmDeleteSchedule(context, schedule),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEE2E2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 18,
+                ),
+              ),
+            ),
+          ] else
+            GestureDetector(
+              onTap: _navigateToAddSchedule,
+              child: const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Fungsi navigasi ke formulir Tambah Jadwal
+  Future<void> _navigateToAddSchedule() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddScheduleScreen(
+          initialDay: _selectedDate ?? 21,
+          initialMonth: 10,
+          initialYear: 2026,
+        ),
+      ),
+    );
+    if (result != null && result is ScheduleItem && mounted) {
+      setState(() {
+        _selectedDate = result.date.day;
+      });
+    }
+  }
+
+  // Fungsi navigasi ke formulir Ubah/Edit Jadwal
+  Future<void> _navigateToEditSchedule(ScheduleItem schedule) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddScheduleScreen(
+          existingSchedule: schedule,
+        ),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() {
+        if (result is ScheduleItem) {
+          _selectedDate = result.date.day;
+        }
+      });
+    }
+  }
+
+  // Dialog Konfirmasi Hapus Jadwal dari Layar Kalender
+  void _confirmDeleteSchedule(BuildContext context, ScheduleItem schedule) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'Hapus Jadwal?',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryDark,
+          ),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus jadwal kontrol pada tanggal ${schedule.date.day} Oktober 2026? Titik di kalender akan dibersihkan.',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            color: const Color(0xFF64748B),
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScheduleData.instance.deleteSchedule(schedule.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Jadwal kontrol ${schedule.date.day} Oktober 2026 berhasil dihapus.',
+                    style: GoogleFonts.inter(fontSize: 13),
+                  ),
+                  backgroundColor: AppColors.primaryDark,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Hapus',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── 5. WIDGET STATUS CARD: PENGINGAT H-3 AKTIF (DENGAN SAKLAR ON/OFF) ───
+  Widget _buildReminderStatusCard() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: ScheduleData.instance.isReminderEnabledNotifier,
+      builder: (context, isEnabled, _) {
+        final String title;
+        final String subtitle;
+        final Color iconBg;
+        final Color iconColor;
+        final IconData iconData;
+
+        if (isEnabled) {
+          title = 'Pengingat H-3 aktif';
+          iconBg = const Color(0xFFEAF8F6);
+          iconColor = AppColors.accentTeal;
+          iconData = Icons.notifications_none_outlined;
+
+          final upcoming = ScheduleData.instance.upcomingSchedule;
+          if (upcoming != null) {
+            final now = DateTime.now();
+            final sched = DateTime(
+              upcoming.date.year,
+              upcoming.date.month,
+              upcoming.date.day,
+            );
+            final today = DateTime(now.year, now.month, now.day);
+            final diff = sched.difference(today).inDays;
+            if (diff <= 3 && diff >= 0) {
+              subtitle = 'Notifikasi pengingat sudah aktif di menu notifikasi';
+            } else {
+              subtitle = 'Notifikasi akan dikirim otomatis';
+            }
+          } else {
+            subtitle = 'Notifikasi akan dikirim otomatis';
+          }
+        } else {
+          title = 'Pengingat nonaktif';
+          subtitle = 'Notifikasi otomatis dinonaktifkan';
+          iconBg = const Color(0xFFF1F5F9);
+          iconColor = const Color(0xFF94A3B8);
+          iconData = Icons.notifications_off_outlined;
+        }
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: const Color(0xFFE2E8F0),
+              width: 1.0,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x080F172A),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Ikon Lonceng
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  iconData,
+                  color: iconColor,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+
+              // Teks Pengingat
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isEnabled
+                            ? AppColors.primaryDark
+                            : const Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Saklar (Switch) ON / OFF
+              Switch(
+                value: isEnabled,
+                activeThumbColor: AppColors.accentTeal,
+                activeTrackColor: const Color(0xFFC8F0EB),
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: const Color(0xFFCBD5E1),
+                onChanged: (bool newValue) {
+                  if (!newValue) {
+                    // Munculkan dialog konfirmasi sebelum mematikan
+                    _showDisableReminderConfirmation(context);
+                  } else {
+                    // Aktifkan langsung kembali
+                    ScheduleData.instance.setReminderEnabled(true);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Pengingat otomatis berhasil diaktifkan kembali.',
+                          style: GoogleFonts.inter(fontSize: 13),
+                        ),
+                        backgroundColor: AppColors.primaryDark,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Dialog Konfirmasi Keamanan saat Hendak Mematikan Pengingat
+  void _showDisableReminderConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.notification_important_rounded,
+                color: Color(0xFFEF4444),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Nonaktifkan Pengingat?',
+                style: GoogleFonts.inter(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryDark,
+                ),
+              ),
             ),
           ],
         ),
+        content: Text(
+          'Jika dinonaktifkan, Anda tidak akan mendapatkan pengingat otomatis sebelum jadwal pemeriksaan kehamilan tiba.\n\nKami sangat menyarankan tetap menyalakannya demi memantau kesehatan Ibu dan janin secara teratur.',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            color: const Color(0xFF64748B),
+            height: 1.45,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Batal (Tetap Aktif)',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryDark,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScheduleData.instance.setReminderEnabled(false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Pengingat kontrol otomatis telah dinonaktifkan.',
+                    style: GoogleFonts.inter(fontSize: 13),
+                  ),
+                  backgroundColor: AppColors.primaryDark,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF1F5F9),
+              foregroundColor: const Color(0xFFEF4444),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Ya, Nonaktifkan',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -595,102 +950,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
     );
   }
-
-  // Bottom Sheet untuk Menambah Jadwal Kontrol Baru
-  void _showAddScheduleBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFCBD5E1),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Tambah Jadwal Kontrol',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Tanggal dipilih: ${_selectedDate ?? 20} Oktober 2026',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.accentTeal,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Jadwal kontrol ${_selectedDate ?? 20} Oktober 2026 disimpan!',
-                          style: GoogleFonts.inter(),
-                        ),
-                        backgroundColor: AppColors.primaryDark,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryDark,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    'Simpan Jadwal',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _CalendarCell {
   final int day;
   final bool isCurrentMonth;
   final bool isWeekend;
-  final bool hasEventDot;
 
   _CalendarCell({
     required this.day,
     this.isCurrentMonth = true,
     this.isWeekend = false,
-    this.hasEventDot = false,
   });
 }
-
