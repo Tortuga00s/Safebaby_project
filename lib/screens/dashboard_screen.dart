@@ -6,7 +6,9 @@ import '../core/app_theme.dart';
 import '../core/schedule_data.dart';
 import 'notification_screen.dart';
 import '../core/history_data.dart';
+import '../core/profile_data.dart';
 import 'history_screen.dart';
+import 'profile_screen.dart';
 import 'schedule_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -49,6 +51,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _currentTabIndex = 2;
               });
             },
+            onNavigateToProfile: () {
+              setState(() {
+                _currentTabIndex = 3;
+              });
+            },
           ),
 
           // Tab 2: Riwayat Pemeriksaan
@@ -64,10 +71,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _currentTabIndex = 1;
               });
             },
+            onNavigateToProfile: () {
+              setState(() {
+                _currentTabIndex = 3;
+              });
+            },
           ),
 
-          // Tab 3: Profil Pengguna (Placeholder)
-          _buildPlaceholderTab('Profil Pengguna'),
+          // Tab 3: Profil Pengguna
+          ProfileScreen(
+            isEmbedded: true,
+            onNavigateToDashboard: () {
+              setState(() {
+                _currentTabIndex = 0;
+              });
+            },
+            onNavigateToSchedule: () {
+              setState(() {
+                _currentTabIndex = 1;
+              });
+            },
+            onNavigateToHistory: () {
+              setState(() {
+                _currentTabIndex = 2;
+              });
+            },
+          ),
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -144,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Halo, ${widget.userName}',
+              'Halo, ${ProfileData.instance.profile.firstName}',
               style: GoogleFonts.inter(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -1106,40 +1135,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ PLACEHOLDER UNTUK TAB RIWAYAT & PROFIL Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
-  Widget _buildPlaceholderTab(String title) {
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.hourglass_empty_rounded,
-              size: 48,
-              color: AppColors.accentTeal,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryDark,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Halaman ini akan segera hadir pada update berikutnya.',
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: const Color(0xFF64748B),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ 6. BOTTOM NAVIGATION BAR Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   Widget _buildBottomNavigationBar() {
