@@ -5,15 +5,19 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_theme.dart';
 import '../core/schedule_data.dart';
 import 'add_schedule_screen.dart';
+import '../widgets/record_checkup_sheet.dart';
+import 'history_screen.dart';
 
 class ScheduleScreen extends StatefulWidget {
   final VoidCallback? onNavigateToDashboard;
+  final VoidCallback? onNavigateToHistory;
   final bool isEmbedded;
   final int? initialSelectedDate;
 
   const ScheduleScreen({
     super.key,
     this.onNavigateToDashboard,
+    this.onNavigateToHistory,
     this.isEmbedded = false,
     this.initialSelectedDate,
   });
@@ -371,7 +375,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     final isScheduled = schedule != null;
 
-    return Container(
+    final cardContent = Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
       decoration: BoxDecoration(
@@ -498,6 +502,101 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         ],
       ),
     );
+
+    if (!isScheduled) {
+      return cardContent;
+    }
+
+    // Jika ada jadwal, tampilkan tombol "Selesai & Catat Hasil Pemeriksaan"
+    return Column(
+      children: [
+        cardContent,
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          height: 46,
+          child: ElevatedButton.icon(
+            onPressed: () => _openRecordCheckupResult(schedule),
+            icon: const Icon(
+              Icons.check_circle_outline_rounded,
+              size: 20,
+            ),
+            label: Text(
+              'Selesai & Catat Hasil Pemeriksaan',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentTeal,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Fungsi membuka bottom sheet untuk menandai selesai dan mencatat hasil kontrol
+  Future<void> _openRecordCheckupResult(ScheduleItem schedule) async {
+    final recorded = await RecordCheckupSheet.show(
+      context,
+      fromSchedule: schedule,
+    );
+
+    if (recorded == true && mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.primaryDark,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.accentTeal,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Pemeriksaan selesai! Data telah tersimpan di Riwayat.',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          action: SnackBarAction(
+            label: 'Lihat Riwayat',
+            textColor: AppColors.accentTeal,
+            onPressed: () {
+              if (widget.onNavigateToHistory != null) {
+                widget.onNavigateToHistory!();
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const HistoryScreen(),
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      );
+    }
   }
 
   // Fungsi navigasi ke formulir Tambah Jadwal
@@ -918,6 +1017,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             widget.onNavigateToDashboard!();
           } else {
             Navigator.pop(context);
+          }
+        } else if (index == 2) {
+          if (widget.onNavigateToHistory != null) {
+            widget.onNavigateToHistory!();
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const HistoryScreen(),
+              ),
+            );
           }
         } else {
           setState(() {
