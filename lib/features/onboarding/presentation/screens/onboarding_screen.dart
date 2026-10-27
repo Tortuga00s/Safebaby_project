@@ -1,9 +1,9 @@
 // lib/screens/onboarding_screen.dart
-import 'create_profile_screen.dart';
+import 'package:safebaby/features/profile/presentation/screens/create_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../core/app_theme.dart';
+import 'package:safebaby/core/theme/app_theme.dart';
 
 class OnboardingItem {
   final String step;

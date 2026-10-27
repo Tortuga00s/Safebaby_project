@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../core/app_theme.dart';
-import '../core/history_data.dart';
-import '../core/schedule_data.dart';
+import 'package:safebaby/core/theme/app_theme.dart';
+import 'package:safebaby/features/history/data/history_data.dart';
+import 'package:safebaby/features/schedule/data/schedule_data.dart';
 
 class RecordCheckupSheet extends StatefulWidget {
   final CheckupHistoryItem? initialItem;
