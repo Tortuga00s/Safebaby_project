@@ -1,7 +1,7 @@
 // lib/screens/welcome_screen.dart
-import 'onboarding_screen.dart';
+import 'package:safebaby/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
-import '../core/app_theme.dart';
+import 'package:safebaby/core/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

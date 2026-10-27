@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../core/app_theme.dart';
-import '../core/schedule_data.dart';
+import 'package:safebaby/core/theme/app_theme.dart';
+import 'package:safebaby/core/utils/date_formatter.dart';
+import 'package:safebaby/features/schedule/data/schedule_data.dart';
+import 'package:safebaby/features/schedule/presentation/widgets/schedule_form_card.dart';
 
 class AddScheduleScreen extends StatefulWidget {
   final int initialDay;
@@ -73,62 +75,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     return const TimeOfDay(hour: 9, minute: 0);
   }
 
-  // Format Hari dalam Bahasa Indonesia
-  String _getDayName(int weekday) {
-    switch (weekday) {
-      case DateTime.monday:
-        return 'Senin';
-      case DateTime.tuesday:
-        return 'Selasa';
-      case DateTime.wednesday:
-        return 'Rabu';
-      case DateTime.thursday:
-        return 'Kamis';
-      case DateTime.friday:
-        return 'Jumat';
-      case DateTime.saturday:
-        return 'Sabtu';
-      case DateTime.sunday:
-        return 'Minggu';
-      default:
-        return '';
-    }
-  }
-
-  // Format Bulan dalam Bahasa Indonesia
-  String _getMonthName(int month) {
-    const months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    return months[month - 1];
-  }
-
-  String _formatFullDate(DateTime date) {
-    return '${_getDayName(date.weekday)}, ${date.day} ${_getMonthName(date.month)} ${date.year}';
-  }
-
-  String _formatSimpleDate(DateTime date) {
-    return '${date.day} ${_getMonthName(date.month)} ${date.year}';
-  }
-
-  String _formatTimeOfDay(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour.$minute WIB';
-  }
-
-  // Pemilih Tanggal (DatePicker)
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -156,7 +102,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // Pemilih Waktu (TimePicker)
   Future<void> _pickTime() async {
     final picked = await showTimePicker(
       context: context,
@@ -182,7 +127,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // Validasi & Simpan / Perbarui Jadwal
   void _saveSchedule() {
     final location = _locationController.text.trim();
 
@@ -222,19 +166,20 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       return;
     }
 
+    final formattedTime = _selectedTime != null
+        ? AppDateFormatter.formatTimeOfDay(_selectedTime!)
+        : (_isEditMode ? widget.existingSchedule!.time : '09.00 WIB');
+
     if (_isEditMode) {
       final updatedSchedule = ScheduleItem(
         id: widget.existingSchedule!.id,
         date: _selectedDate,
-        time: _selectedTime != null
-            ? _formatTimeOfDay(_selectedTime!)
-            : widget.existingSchedule!.time,
+        time: formattedTime,
         location: location,
         status: _statusController.text,
       );
 
       ScheduleData.instance.updateSchedule(updatedSchedule);
-
       Navigator.pop(context, updatedSchedule);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -254,15 +199,12 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       final newSchedule = ScheduleItem(
         id: DateTime.now().millisecondsSinceEpoch,
         date: _selectedDate,
-        time: _selectedTime != null
-            ? _formatTimeOfDay(_selectedTime!)
-            : '09.00 WIB',
+        time: formattedTime,
         location: location,
         status: _statusController.text,
       );
 
       ScheduleData.instance.addSchedule(newSchedule);
-
       Navigator.pop(context, newSchedule);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -281,7 +223,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // Dialog Konfirmasi Hapus Jadwal dari Form Edit
   void _confirmDelete() {
     showDialog(
       context: context,
@@ -369,27 +310,34 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             children: [
               const SizedBox(height: 8),
 
-              // ─── 1. TOP BAR: TOMBOL KEMBALI & JUDUL ───
+              // 1. TOP BAR: TOMBOL KEMBALI & JUDUL
               _buildHeader(),
 
               const SizedBox(height: 24),
 
-              // ─── 2. HERO CARD: TANGGAL TERPILIH ───
+              // 2. HERO CARD: TANGGAL TERPILIH
               _buildSelectedDateHeroCard(),
 
               const SizedBox(height: 20),
 
-              // ─── 3. FORM CARD PUTIH ───
-              _buildFormCard(),
+              // 3. FORM CARD PUTIH
+              ScheduleFormCard(
+                selectedDate: _selectedDate,
+                selectedTime: _selectedTime,
+                locationController: _locationController,
+                statusController: _statusController,
+                onPickDate: _pickDate,
+                onPickTime: _pickTime,
+              ),
 
               const SizedBox(height: 16),
 
-              // ─── 4. NOTICE BANNER PENGINGAT ───
+              // 4. NOTICE BANNER PENGINGAT
               _buildReminderNoticeBanner(),
 
               const SizedBox(height: 32),
 
-              // ─── 5. ACTION BUTTONS (SIMPAN & BATAL) ───
+              // 5. ACTION BUTTONS (SIMPAN & BATAL)
               _buildActionButtons(),
 
               const SizedBox(height: 16),
@@ -400,7 +348,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
   }
 
-  // ─── 1. WIDGET HEADER ───
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -452,8 +399,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             ),
           ],
         ),
-
-        // Tombol Hapus Sampah di Header jika Mode Edit
         if (_isEditMode)
           GestureDetector(
             onTap: _confirmDelete,
@@ -475,7 +420,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
   }
 
-  // ─── 2. WIDGET HERO CARD: TANGGAL TERPILIH ───
   Widget _buildSelectedDateHeroCard() {
     return Container(
       width: double.infinity,
@@ -493,7 +437,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       ),
       child: Row(
         children: [
-          // Ikon Kalender Toska
           Container(
             width: 46,
             height: 46,
@@ -508,8 +451,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             ),
           ),
           const SizedBox(width: 14),
-
-          // Teks Tanggal Terpilih
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,7 +466,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatFullDate(_selectedDate),
+                  AppDateFormatter.formatFullDate(_selectedDate),
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -540,202 +481,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
   }
 
-  // ─── 3. WIDGET FORM CARD PUTIH ───
-  Widget _buildFormCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1.0,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x080F172A),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Input 1: Tanggal Kontrol
-          _buildClickableField(
-            label: 'Tanggal kontrol',
-            value: _formatSimpleDate(_selectedDate),
-            onTap: _pickDate,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Input 2: Waktu
-          _buildClickableField(
-            label: 'Waktu',
-            value: _selectedTime != null
-                ? _formatTimeOfDay(_selectedTime!)
-                : 'Pilih Waktu (contoh: 09.00 WIB)',
-            onTap: _pickTime,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Input 3: Lokasi
-          _buildTextInputField(
-            label: 'Lokasi',
-            controller: _locationController,
-            hintText: 'Nama klinik atau bidan',
-          ),
-
-          const SizedBox(height: 16),
-
-          // Input 4: Status
-          _buildReadOnlyField(
-            label: 'Status',
-            controller: _statusController,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Field Interaktif yang dapat diklik (Tanggal / Waktu)
-  Widget _buildClickableField({
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primaryDark,
-          ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.primaryDark,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Field Teks Biasa (Lokasi)
-  Widget _buildTextInputField({
-    required String label,
-    required TextEditingController controller,
-    required String hintText,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primaryDark,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.centerLeft,
-          child: TextField(
-            controller: controller,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.primaryDark,
-            ),
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF94A3B8),
-              ),
-              border: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Field Status Read-only
-  Widget _buildReadOnlyField({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primaryDark,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            controller.text,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.primaryDark,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ─── 4. WIDGET NOTICE BANNER PENGINGAT ───
   Widget _buildReminderNoticeBanner() {
     return Container(
       width: double.infinity,
@@ -769,11 +514,9 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
   }
 
-  // ─── 5. WIDGET ACTION BUTTONS (SIMPAN & BATAL) ───
   Widget _buildActionButtons() {
     return Column(
       children: [
-        // Tombol Simpan / Perbarui Jadwal (Navy)
         SizedBox(
           width: double.infinity,
           height: 54,
@@ -797,10 +540,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: 14),
-
-        // Tombol Batal
         Center(
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
